@@ -1,0 +1,179 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "検索API",
+    "description": "書籍・雑誌の検索を行うためのAPIを提供します。"
+  },
+  "servers": [
+    {
+      "url": "https://env1.example.com/",
+      "description": "環境1",
+      "variables": {}
+    },
+    {
+      "url": "https://env2.example.com/",
+      "description": "環境2",
+      "variables": {}
+    }
+  ],
+  "security": [
+    {
+      "bearer_token": []
+    }
+  ],
+  "paths": {
+    "/search": {
+      "post": {
+        "tags": [
+          "search-api"
+        ],
+        "summary": "書籍・雑誌の検索を行います。",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "X-Hello-World",
+            "in": "header",
+            "description": "Hello Worldの値を指定します。"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json;charset=UTF-8": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "default response",
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RequestCriteria": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "検索結果の上限数を指定します。",
+            "format": "int32",
+            "default": 10
+          },
+          "excludeOutOfStock": {
+            "type": "boolean",
+            "description": "在庫切れ商品を除外する場合trueを指定します。",
+            "default": false
+          }
+        },
+        "description": "検索時の条件を指定します。"
+      },
+      "SearchRequest": {
+        "required": [
+          "keywords",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "検索対象の種類を指定します。",
+            "enum": [
+              "BOOK",
+              "MAGAZINE"
+            ]
+          },
+          "keywords": {
+            "type": "array",
+            "description": "検索キーワードを指定します。",
+            "items": {
+              "type": "string",
+              "description": "検索キーワードを指定します。"
+            }
+          },
+          "requestCriteria": {
+            "$ref": "#/components/schemas/RequestCriteria"
+          }
+        }
+      },
+      "ErrorInfo": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "description": "エラーコード"
+          },
+          "message": {
+            "type": "string",
+            "description": "エラーメッセージ"
+          }
+        },
+        "description": "エラー情報です。正常応答の場合、設定されません。"
+      },
+      "ItemInfo": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "タイトル"
+          },
+          "type": {
+            "type": "string",
+            "description": "種類（書籍・雑誌）",
+            "enum": [
+              "BOOK",
+              "MAGAZINE"
+            ]
+          },
+          "author": {
+            "type": "string",
+            "description": "著者名（雑誌の場合、雑誌名+「編集部」が固定で指定されます）"
+          },
+          "publisher": {
+            "type": "string",
+            "description": "出版社名"
+          },
+          "price": {
+            "type": "integer",
+            "description": "金額（税込）",
+            "format": "int32"
+          }
+        },
+        "description": "検索結果のリストです。エラー応答の場合、設定されません。"
+      },
+      "SearchResponse": {
+        "type": "object",
+        "properties": {
+          "resultList": {
+            "type": "array",
+            "description": "検索結果のリストです。エラー応答の場合、設定されません。",
+            "items": {
+              "$ref": "#/components/schemas/ItemInfo"
+            }
+          },
+          "errorInfo": {
+            "$ref": "#/components/schemas/ErrorInfo"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer_token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
